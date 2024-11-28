@@ -1,0 +1,50 @@
+[
+{
+  "directory": "E:/Poject/guide/My_guide/testmap/my-app/backend/build",
+  "command": "E:\\software\\msy2\\ucrt64\\bin\\g++.exe   -g -o CMakeFiles\\back.dir\\test.cpp.obj -c E:\\Poject\\guide\\My_guide\\testmap\\my-app\\backend\\test.cpp",
+  "file": "E:/Poject/guide/My_guide/testmap/my-app/backend/test.cpp",
+  "output": "CMakeFiles/back.dir/test.cpp.obj"
+},
+{
+  "directory": "E:/Poject/guide/My_guide/testmap/my-app/backend/build",
+  "command": "E:\\software\\msy2\\ucrt64\\bin\\g++.exe   -g -o CMakeFiles\\back.dir\\tinystr.cpp.obj -c E:\\Poject\\guide\\My_guide\\testmap\\my-app\\backend\\tinystr.cpp",
+  "file": "E:/Poject/guide/My_guide/testmap/my-app/backend/tinystr.cpp",
+  "output": "CMakeFiles/back.dir/tinystr.cpp.obj"
+},
+{
+  "directory": "E:/Poject/guide/My_guide/testmap/my-app/backend/build",
+  "command": "E:\\software\\msy2\\ucrt64\\bin\\g++.exe   -g -o CMakeFiles\\back.dir\\tinyxml.cpp.obj -c E:\\Poject\\guide\\My_guide\\testmap\\my-app\\backend\\tinyxml.cpp",
+  "file": "E:/Poject/guide/My_guide/testmap/my-app/backend/tinyxml.cpp",
+  "output": "CMakeFiles/back.dir/tinyxml.cpp.obj"
+},
+{
+  "directory": "E:/Poject/guide/My_guide/testmap/my-app/backend/build",
+  "command": "E:\\software\\msy2\\ucrt64\\bin\\g++.exe   -g -o CMakeFiles\\back.dir\\tinyxmlerror.cpp.obj -c E:\\Poject\\guide\\My_guide\\testmap\\my-app\\backend\\tinyxmlerror.cpp",
+  "file": "E:/Poject/guide/My_guide/testmap/my-app/backend/tinyxmlerror.cpp",
+  "output": "CMakeFiles/back.dir/tinyxmlerror.cpp.obj"
+},
+{
+  "directory": "E:/Poject/guide/My_guide/testmap/my-app/backend/build",
+  "command": "E:\\software\\msy2\\ucrt64\\bin\\g++.exe   -g -o CMakeFiles\\back.dir\\tinyxmlparser.cpp.obj -c E:\\Poject\\guide\\My_guide\\testmap\\my-app\\backend\\tinyxmlparser.cpp",
+  "file": "E:/Poject/guide/My_guide/testmap/my-app/backend/tinyxmlparser.cpp",
+  "output": "CMakeFiles/back.dir/tinyxmlparser.cpp.obj"
+},
+{
+  "directory": "E:/Poject/guide/My_guide/testmap/my-app/backend/build",
+  "command": "E:\\software\\msy2\\ucrt64\\bin\\g++.exe   -g -o CMakeFiles\\back.dir\\map_model.cpp.obj -c E:\\Poject\\guide\\My_guide\\testmap\\my-app\\backend\\map_model.cpp",
+  "file": "E:/Poject/guide/My_guide/testmap/my-app/backend/map_model.cpp",
+  "output": "CMakeFiles/back.dir/map_model.cpp.obj"
+},
+{
+  "directory": "E:/Poject/guide/My_guide/testmap/my-app/backend/build",
+  "command": "E:\\software\\msy2\\ucrt64\\bin\\g++.exe   -g -o CMakeFiles\\back.dir\\planner.cpp.obj -c E:\\Poject\\guide\\My_guide\\testmap\\my-app\\backend\\planner.cpp",
+  "file": "E:/Poject/guide/My_guide/testmap/my-app/backend/planner.cpp",
+  "output": "CMakeFiles/back.dir/planner.cpp.obj"
+},
+{
+  "directory": "E:/Poject/guide/My_guide/testmap/my-app/backend/build",
+  "command": "E:\\software\\msy2\\ucrt64\\bin\\g++.exe   -g -o CMakeFiles\\back.dir\\graph_model.cpp.obj -c E:\\Poject\\guide\\My_guide\\testmap\\my-app\\backend\\graph_model.cpp",
+  "file": "E:/Poject/guide/My_guide/testmap/my-app/backend/graph_model.cpp",
+  "output": "CMakeFiles/back.dir/graph_model.cpp.obj"
+}
+]

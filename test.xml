@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Persons>
+    <Person ID = '1' other = 'info'>
+        <name>Michael</name>
+        <age>23</age>
+    </Person>
+</Persons>
