@@ -4,8 +4,16 @@
 
 Route_planner::Route_planner(Graph_model& model) : self_model_(model), openlist_start(cmp(*this)), openlist_end(cmp(*this)){
     // Convert inputs to percentage:
+    node_infomation.reserve(200000);
+    parent_node_backward.reserve(200000);
+    parent_node_forward.reserve(200000);
+    is_visited_backward.reserve(200000);
+    is_visited_backward.reserve(200000);
+    is_closed_backward.reserve(200000);
+    is_closed_formward.reserve(200000);
     path.clear();
     distance_ = 0.0f;
+    traveltime_ = 0.0f;
 }
 
 void Route_planner::reset(float start_Lon, float start_Lat, float end_Lon, float end_Lat){
@@ -18,8 +26,11 @@ void Route_planner::reset(float start_Lon, float start_Lat, float end_Lon, float
     parent_node_forward.clear();
     is_visited_formward.clear();
     is_visited_backward.clear();
+    is_closed_backward.clear();
+    is_closed_formward.clear();
     node_infomation.clear();
     distance_ = 0.0f;
+    traveltime_ = 0.0f;
     cout<<"reset point begin"<<endl;
 
     time_t start_time=clock();
@@ -45,17 +56,20 @@ void Route_planner::A_star_search() {
     is_visited_backward.insert(end_node_);
     unsigned long max_openlistsize = 0;
     clock_t sum_time_of_add_neighbors=0;
-    
+    int loop_time = 0;
+
     while(!openlist_start.empty() && !openlist_end.empty()){
+        loop_time++;
         int current_node_backward = openlist_end.top();
         int current_node_forward = openlist_start.top();
-
         //cout<<"current_node_forward: "<<current_node_forward<<" current_node_backward: "<<current_node_backward<<endl;
         openlist_start.pop();
-        if(is_visited_backward.find(current_node_forward)!= is_visited_backward.end()){
+        is_closed_formward.insert(current_node_forward);
+        if(is_closed_backward.find(current_node_forward)!= is_visited_backward.end()){
             clock_t start_time_of_construct=clock();
             construct_final_path(current_node_forward);
             clock_t end_time_of_construct=clock();
+            cout<<"loop: "<<loop_time<<endl;
             cout<< "visitedsize: "<< is_visited_formward.size()+is_visited_backward.size()<<endl;
             cout<< "max_openlistsize: "<<max_openlistsize<<endl;
             cout << "The construct time is: " <<(double)(end_time_of_construct - start_time_of_construct) / CLOCKS_PER_SEC << "s" << endl;
@@ -63,15 +77,17 @@ void Route_planner::A_star_search() {
             return;
         }
         clock_t start_time=clock();
-        add_neighbors_forward(current_node_forward, current_node_forward);
+        add_neighbors_forward(current_node_forward);
         clock_t end_time=clock();
         sum_time_of_add_neighbors += (end_time - start_time);
 
         openlist_end.pop();
-        if(is_visited_formward.find(current_node_backward)!= is_visited_formward.end()){
+        is_closed_backward.insert(current_node_backward);
+        if(is_closed_formward.find(current_node_backward)!= is_visited_formward.end()){
             clock_t start_time_of_construct=clock();
             construct_final_path(current_node_backward);
             clock_t end_time_of_construct=clock();
+            cout<<"loop: "<<loop_time<<endl;
             cout<< "visitedsize: "<< is_visited_formward.size()+is_visited_backward.size()<<endl;
             cout<< "max_openlistsize: "<<max_openlistsize<<endl;
             cout << "The construct time is: " <<(double)(end_time_of_construct - start_time_of_construct) / CLOCKS_PER_SEC << "s" << endl;
@@ -79,7 +95,7 @@ void Route_planner::A_star_search() {
             return;
         }
         start_time=clock();
-        add_neighbors_backward(current_node_forward, current_node_backward);
+        add_neighbors_backward(current_node_backward);
         end_time=clock();
         sum_time_of_add_neighbors += (end_time - start_time);
         max_openlistsize = max(max_openlistsize, openlist_start.size()+openlist_end.size());
@@ -87,21 +103,29 @@ void Route_planner::A_star_search() {
     cout<<"error"<<endl;
 }
 
-inline void Route_planner::add_neighbors_forward(int current_node_forward, int current_node_backward) {
+inline void Route_planner::add_neighbors_forward(int current_node_forward) {
     //cout<<"add_neighbors begin"<<endl;
     //cout<<"neibors size: "<<self_model_.node_neighbors_list[current_node_forward].size()<<endl;
     for(int neighbor : self_model_.node_neighbors_list[current_node_forward]){
         //cout<<"loop begin"<<endl;
-        if(is_visited_formward.find(neighbor) != is_visited_formward.end()){
+        if(is_closed_formward.find(neighbor) != is_visited_formward.end()){
             //cout<<"hit"<<endl;
             continue;
         }
         parent_node_forward[neighbor] = current_node_forward;
         //cout<<"father_info finished"<<endl;
-        int g_value = node_infomation[current_node_forward].first + self_model_.node_neighbors_distance_list[make_pair(current_node_forward, neighbor)];
+        float g_value = node_infomation[current_node_forward].first + self_model_.node_neighbors_traveltime_list_[make_pair(current_node_forward, neighbor)];
         //cout<<"g_value finished"<<endl;
-        int h_value = 2*self_model_.map.distance(neighbor, end_node_);
+        float h_value = 60*1.25*self_model_.map.distance(neighbor, end_node_)/(self_model_.average_speed_*1000);
         //cout<<"h_value finished"<<endl;
+        if(is_visited_formward.find(neighbor)!= is_visited_formward.end()){
+            //cout<<"hit"<<endl;
+            if(g_value + h_value < node_infomation[neighbor].second){
+                node_infomation[neighbor] = {g_value, h_value};
+                openlist_start.push(neighbor);
+            }
+            continue;
+        }
         node_infomation[neighbor] = {g_value, h_value};
         openlist_start.push(neighbor);
         is_visited_formward.insert(neighbor);        
@@ -109,16 +133,23 @@ inline void Route_planner::add_neighbors_forward(int current_node_forward, int c
     //cout<<"add_neighbors end"<<endl;
 }
 
-inline void Route_planner::add_neighbors_backward(int current_node_forward, int current_node_backward) {
+inline void Route_planner::add_neighbors_backward(int current_node_backward) {
     //cout<<"add_neighbors begin"<<endl;
     //cout<<"neibors size: "<<self_model_.node_neighbors_list[current_node_backward].size()<<endl;
     for(int neighbor : self_model_.node_neighbors_list[current_node_backward]){
-        if(is_visited_backward.find(neighbor)!= is_visited_backward.end()){
+        if(is_closed_backward.find(neighbor)!= is_visited_backward.end()){
             continue;
         }
         parent_node_backward[neighbor] = current_node_backward;
-        int g_value = node_infomation[current_node_backward].first + self_model_.node_neighbors_distance_list[make_pair(current_node_backward, neighbor)];
-        int h_value = 2*self_model_.map.distance(neighbor, start_node_);
+        float g_value = node_infomation[current_node_backward].first + self_model_.node_neighbors_traveltime_list_[make_pair(current_node_backward, neighbor)];
+        float h_value = 60*1.25*self_model_.map.distance(neighbor, start_node_)/(self_model_.average_speed_*1000);
+        if(is_visited_backward.find(neighbor)!= is_visited_backward.end()){
+            if(g_value + h_value < node_infomation[neighbor].second){
+                node_infomation[neighbor] = {g_value, h_value};
+                openlist_end.push(neighbor);
+            }
+            continue;
+        }
         node_infomation[neighbor] = {g_value, h_value};
         openlist_end.push(neighbor);
         is_visited_backward.insert(neighbor);
@@ -134,16 +165,19 @@ void Route_planner::construct_final_path(int current_node){
         path.push_front(node_iter);
         node_iter = parent_node_forward[node_iter];
         //cout<<"node_iter: "<<node_iter<<" "<<"path.front(): "<<path.front()<<endl;
-        distance_ += self_model_.node_neighbors_distance_list[make_pair(node_iter, path.front())];     
+        distance_ += self_model_.node_neighbors_distance_list[make_pair(node_iter, path.front())];
+        traveltime_ += self_model_.node_neighbors_traveltime_list_[make_pair(node_iter, path.front())];     
     }
     path.push_front(start_node_);
     distance_ += self_model_.node_neighbors_distance_list[make_pair(node_iter, path.front())];
+    traveltime_ += self_model_.node_neighbors_traveltime_list_[make_pair(node_iter, path.front())];
     node_iter = current_node;
     while (node_iter != end_node_)
     {
         node_iter = parent_node_backward[node_iter];
         //cout<<"node_iter: "<<node_iter<<" "<<"path.back(): "<<path.back()<<endl;
         distance_ += self_model_.node_neighbors_distance_list[make_pair(node_iter, path.back())];
+        traveltime_ += self_model_.node_neighbors_traveltime_list_[make_pair(node_iter, path.back())];
         path.push_back(node_iter);
     }
 }

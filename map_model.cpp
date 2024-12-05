@@ -207,16 +207,16 @@ void Map_model::Load_data(const char* map_path){
                 Roads_list.back().is_oneway = road_is_oneway;
                 if(road_max_speed == 0){
                     if(way_type == Road::Motorway){
-                        Roads_list.back().max_speed = 100;
+                        Roads_list.back().max_speed = 120;
                     }
                     else if(way_type == Road::Trunk){
-                        Roads_list.back().max_speed = 70;
+                        Roads_list.back().max_speed = 100;
                     }
                     else if(way_type == Road::Primary){
-                        Roads_list.back().max_speed = 40;
+                        Roads_list.back().max_speed = 70;
                     }
                     else if(way_type == Road::Secondary){
-                        Roads_list.back().max_speed = 30;
+                        Roads_list.back().max_speed = 60;
                     }
                     else if(way_type == Road::Tertiary){
                         Roads_list.back().max_speed = 40;
@@ -225,10 +225,10 @@ void Map_model::Load_data(const char* map_path){
                         Roads_list.back().max_speed = 5;
                     }
                     else if(way_type == Road::Service){
-                        Roads_list.back().max_speed = 10;
+                        Roads_list.back().max_speed = 5;
                     }
                     else if(way_type == Road::Unclassified){
-                        Roads_list.back().max_speed = 20;
+                        Roads_list.back().max_speed = 10;
                     }
                 }
                 else{
@@ -240,14 +240,14 @@ void Map_model::Load_data(const char* map_path){
                 Foot_Way_list.back().Way_type = Map_model::Road::Footway;
                 Foot_Way_list.back().Way_id = Way_id_map[stoll(node_w->Attribute("id"))];
                 Foot_Way_list.back().is_oneway = false;
-                Roads_list.back().max_speed = 5;
+                Foot_Way_list.back().max_speed = 5;
         }
         if(iscycleway){
                 Cycle_Way_list.emplace_back();
                 Cycle_Way_list.back().Way_type = Map_model::Road::Cycleway;
                 Cycle_Way_list.back().Way_id = Way_id_map[stoll(node_w->Attribute("id"))];
                 Cycle_Way_list.back().is_oneway = cycleway_is_oneway;
-                Roads_list.back().max_speed = 15;
+                Cycle_Way_list.back().max_speed = 15;
         }
     }
     //cout<<endl;

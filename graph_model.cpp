@@ -5,12 +5,15 @@ Graph_model::Graph_model(const string& mode, Map_model& map) : map(map){
     cout<<"------------Graph model init begin------------"<<endl;
     cout<<"mode:  "<<mode<<endl;
     if(mode == "drive"){
+        average_speed_ = 15;
         Build(map.Roads());  
     }
     else if(mode == "footway"){
+        average_speed_ = 5;
         Build(map.Foot_Ways());  
     }
     else{
+        average_speed_ = 15;
         Build(map.Cycle_Ways());
     }
 }
@@ -38,11 +41,13 @@ void Graph_model::Build(vector<Map_model::Road>& Roads){
                 if(i != 0){  
                     node_neighbors_list[node_id].push_back(Ways[road.Way_id].Node_ids[i - 1]);
                     node_neighbors_distance_list[make_pair(node_id, Ways[road.Way_id].Node_ids[i - 1])] = map.distance(node_id,Ways[road.Way_id].Node_ids[i - 1]);
+                    node_neighbors_traveltime_list_[make_pair(node_id, Ways[road.Way_id].Node_ids[i - 1])] = 60*map.distance(node_id,Ways[road.Way_id].Node_ids[i - 1])/(road.max_speed*1000);
                     //cout<<"hit 1"<<" ";
                 }
                 if(i != Ways[road.Way_id].Node_ids.size() - 1){
                     node_neighbors_list[node_id].push_back(Ways[road.Way_id].Node_ids[i + 1]);
                     node_neighbors_distance_list[make_pair(node_id, Ways[road.Way_id].Node_ids[i + 1])] = map.distance(node_id,Ways[road.Way_id].Node_ids[i + 1]);
+                    node_neighbors_traveltime_list_[make_pair(node_id, Ways[road.Way_id].Node_ids[i + 1])] = 60*map.distance(node_id,Ways[road.Way_id].Node_ids[i + 1])/(road.max_speed*1000);
                     //cout<<"node id:"<<node_id<<" ";
                     //cout<<"neighbor id:"<<Ways()[road.Way_id].Node_ids[i + 1]<<" ";
                     //cout<<"node id Lon:"<<Nodes()[node_id].Lon<<" ";
@@ -64,6 +69,7 @@ void Graph_model::Build(vector<Map_model::Road>& Roads){
                 if(i != Ways[road.Way_id].Node_ids.size() - 1){
                     node_neighbors_list[node_id].push_back(Ways[road.Way_id].Node_ids[i + 1]);
                     node_neighbors_distance_list[make_pair(node_id, Ways[road.Way_id].Node_ids[i + 1])] = map.distance(node_id,Ways[road.Way_id].Node_ids[i + 1]);
+                    node_neighbors_traveltime_list_[make_pair(node_id, Ways[road.Way_id].Node_ids[i + 1])] = 60*map.distance(node_id,Ways[road.Way_id].Node_ids[i + 1])/(road.max_speed*1000);
                 }
             }
         }

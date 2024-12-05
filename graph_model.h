@@ -38,9 +38,12 @@ public:
     unordered_map<int, vector<int>> node_neighbors_list{};
 	unordered_multimap<string, int> hashstr_nodeids_map{};
     unordered_map<pair<int, int>, double, HashFunc, EqualKey> node_neighbors_distance_list{};
+	unordered_map<pair<int, int>, double, HashFunc, EqualKey> node_neighbors_traveltime_list_{};
 	vector<int> node_with_neighbor{};
 	Map_model& map;
 	GeoHashTire tire_of_neighbor_nodes_roads;
+
+	float average_speed_{};
 };
 
 

@@ -11,6 +11,7 @@ class Route_planner{
     public:
         Route_planner(Graph_model& model);
         float get_distance() const {return distance_;}
+        float get_traveltime() const {return traveltime_;}
         void A_star_search();
         void display_path(string& send_txt){
             int count = 0;
@@ -36,8 +37,8 @@ class Route_planner{
 
 
     private:
-        void add_neighbors_forward(int current_node_forward, int current_node_backward);
-        void add_neighbors_backward(int current_node_forward, int current_node_backward);
+        void add_neighbors_forward(int current_node_forward);
+        void add_neighbors_backward(int current_node_backward);
         void construct_final_path(int current_node);
         unordered_map<int, pair<float, float> > node_infomation{};   
         unordered_map<int, int> parent_node_forward{};
@@ -45,9 +46,12 @@ class Route_planner{
         priority_queue<int, vector<int>, cmp> openlist_start;
         priority_queue<int, vector<int>, cmp> openlist_end;
         unordered_set<int> is_visited_formward{};
+        unordered_set<int> is_closed_formward{};
         unordered_set<int> is_visited_backward{};
+        unordered_set<int> is_closed_backward{};
         Graph_model& self_model_;
         float distance_{};
+        float traveltime_{};
         int start_node_{};
         int end_node_{};
         deque<int> path;

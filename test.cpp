@@ -23,7 +23,18 @@ void search(Route_planner& route_planner, float start_Lon, float start_Lat, floa
         route_planner.reset(start_Lon, start_Lat, end_Lon, end_Lat);
         time_t start_time=clock();
 	    route_planner.A_star_search();
-	    std::cout << "Distance: " << route_planner.get_distance() << " meters." << std::endl;
+        if(route_planner.get_distance() < 1000){
+            std::cout << "Distance: " << route_planner.get_distance() << " meters." << std::endl;
+        }
+        else{
+            std::cout << "Distance: " << route_planner.get_distance() / 1000 << " kilometers." << std::endl;
+        }
+        if(route_planner.get_traveltime() < 60){
+            std::cout << "Travel time: " << route_planner.get_traveltime() << " minutes." << std::endl;
+        }
+        else{
+            std::cout << "Travel time: " << route_planner.get_traveltime() / 60 << " hours." << std::endl;
+        }
         time_t end_time=clock();
         cout << "The search time is: " <<(double)(end_time - start_time) / CLOCKS_PER_SEC << "s" << endl;
 }
