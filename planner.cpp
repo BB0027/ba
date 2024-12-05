@@ -1,4 +1,4 @@
-#pragma GCC optimize(2)
+#pragma GCC optimize(3, "Ofast", "inline")
 #include "planner.h"
 #include <algorithm>
 
@@ -24,12 +24,12 @@ void Route_planner::reset(float start_Lon, float start_Lat, float end_Lon, float
 
     time_t start_time=clock();
     start_node_ = self_model_.find_closest_node(start_Lon, start_Lat);
-    node_infomation[start_node_] = {0.0f, calculate_h_value(start_node_,end_node_, end_node_)};
-    cout << std::fixed << std::setprecision(7)<<"start_node_lon:"<<self_model_.Nodes()[start_node_].Lon<<" start_node_Lat:"<<self_model_.Nodes()[start_node_].Lat<<endl;
+    node_infomation[start_node_] = {0.0f, 2*self_model_.map.distance(start_node_, end_node_)};
+    cout << std::fixed << std::setprecision(7)<<"start_node_lon:"<<self_model_.map.Nodes()[start_node_].Lon<<" start_node_Lat:"<<self_model_.map.Nodes()[start_node_].Lat<<endl;
     //std::cout << std::fixed << std::setprecision(7)<<"Lon: "<<start_node_->node->Lon<<" Lat: "<<start_node_->node->Lat<<endl;
     end_node_ = self_model_.find_closest_node(end_Lon, end_Lat);
-    node_infomation[end_node_] = {0.0f, calculate_h_value(end_node_,end_node_, end_node_)};
-    cout << std::fixed << std::setprecision(7)<<"end_node_lon:"<<self_model_.Nodes()[end_node_].Lon<<" end_node_Lat:"<<self_model_.Nodes()[end_node_].Lat<<endl;
+    node_infomation[end_node_] = {0.0f, 2*self_model_.map.distance(start_node_, end_node_)};
+    cout << std::fixed << std::setprecision(7)<<"end_node_lon:"<<self_model_.map.Nodes()[end_node_].Lon<<" end_node_Lat:"<<self_model_.map.Nodes()[end_node_].Lat<<endl;
     //std::cout << std::fixed << std::setprecision(7)<<"Lon: "<<end_node_->node->Lon<<" Lat: "<<end_node_->node->Lat<<endl;
     time_t end_time=clock();
     cout << "The reset time is: " <<(double)(end_time - start_time) / CLOCKS_PER_SEC << "s" << endl;
@@ -43,6 +43,7 @@ void Route_planner::A_star_search() {
     openlist_end.push(end_node_);
     is_visited_formward.insert(start_node_);
     is_visited_backward.insert(end_node_);
+    unsigned long max_openlistsize = 0;
     clock_t sum_time_of_add_neighbors=0;
     
     while(!openlist_start.empty() && !openlist_end.empty()){
@@ -55,6 +56,8 @@ void Route_planner::A_star_search() {
             clock_t start_time_of_construct=clock();
             construct_final_path(current_node_forward);
             clock_t end_time_of_construct=clock();
+            cout<< "visitedsize: "<< is_visited_formward.size()+is_visited_backward.size()<<endl;
+            cout<< "max_openlistsize: "<<max_openlistsize<<endl;
             cout << "The construct time is: " <<(double)(end_time_of_construct - start_time_of_construct) / CLOCKS_PER_SEC << "s" << endl;
             cout << "The add_neighbors time is: " <<(double)(sum_time_of_add_neighbors) / CLOCKS_PER_SEC << "s" << endl;
             return;
@@ -69,6 +72,8 @@ void Route_planner::A_star_search() {
             clock_t start_time_of_construct=clock();
             construct_final_path(current_node_backward);
             clock_t end_time_of_construct=clock();
+            cout<< "visitedsize: "<< is_visited_formward.size()+is_visited_backward.size()<<endl;
+            cout<< "max_openlistsize: "<<max_openlistsize<<endl;
             cout << "The construct time is: " <<(double)(end_time_of_construct - start_time_of_construct) / CLOCKS_PER_SEC << "s" << endl;
             cout << "The add_neighbors time is: " <<(double)(sum_time_of_add_neighbors) / CLOCKS_PER_SEC << "s" << endl;
             return;
@@ -77,6 +82,7 @@ void Route_planner::A_star_search() {
         add_neighbors_backward(current_node_forward, current_node_backward);
         end_time=clock();
         sum_time_of_add_neighbors += (end_time - start_time);
+        max_openlistsize = max(max_openlistsize, openlist_start.size()+openlist_end.size());
     }
     cout<<"error"<<endl;
 }
@@ -94,7 +100,7 @@ inline void Route_planner::add_neighbors_forward(int current_node_forward, int c
         //cout<<"father_info finished"<<endl;
         int g_value = node_infomation[current_node_forward].first + self_model_.node_neighbors_distance_list[make_pair(current_node_forward, neighbor)];
         //cout<<"g_value finished"<<endl;
-        int h_value = calculate_h_value(neighbor, current_node_backward, end_node_); //可以复用
+        int h_value = 2*self_model_.map.distance(neighbor, end_node_);
         //cout<<"h_value finished"<<endl;
         node_infomation[neighbor] = {g_value, h_value};
         openlist_start.push(neighbor);
@@ -112,19 +118,13 @@ inline void Route_planner::add_neighbors_backward(int current_node_forward, int 
         }
         parent_node_backward[neighbor] = current_node_backward;
         int g_value = node_infomation[current_node_backward].first + self_model_.node_neighbors_distance_list[make_pair(current_node_backward, neighbor)];
-        int h_value = calculate_h_value(neighbor, current_node_forward, start_node_);
+        int h_value = 2*self_model_.map.distance(neighbor, start_node_);
         node_infomation[neighbor] = {g_value, h_value};
         openlist_end.push(neighbor);
         is_visited_backward.insert(neighbor);
     }
 }
 
-inline float Route_planner::calculate_h_value(int node, int to_node, int goal_node) const {
-    //cout<<"calculate_h_value begin"<<endl;
-    //cout<<"node Lon: "<<node_info->node->Lon<<" Lat: "<<node_info->node->Lat<<endl;
-    //cout<<"end_node Lon: "<<end_node_->node->Lon<<" Lat: "<<end_node_->node->Lat<<endl;
-    return self_model_.distance(node, to_node) + self_model_.distance(node, goal_node);
-}
 
 void Route_planner::construct_final_path(int current_node){
     distance_ = 0.0f;

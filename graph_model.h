@@ -1,7 +1,8 @@
 #pragma once
-#pragma GCC optimize(2)
+#pragma GCC optimize(3, "Ofast", "inline")
 #include <unordered_map>
 #include <vector>
+#include "geo_hash.h"
 #include "map_model.h"
 
 using namespace std;
@@ -24,14 +25,22 @@ struct EqualKey {
 };
 
 
-class Graph_model : public Map_model {
+class Graph_model{
 
 public:
-    Graph_model(const char* map_path);
+    Graph_model(const string& mode, Map_model& map);
+	void Build(vector<Map_model::Road>& data);
+
+	void addpoint(GeoHashTire::Tire* cur, unordered_set<int>& res);
+	void search_near_points(float lon, float lat, unordered_set<int>& res, int depth);
 	int find_closest_node(float lon, float lat);
+
     unordered_map<int, vector<int>> node_neighbors_list{};
+	unordered_multimap<string, int> hashstr_nodeids_map{};
     unordered_map<pair<int, int>, double, HashFunc, EqualKey> node_neighbors_distance_list{};
 	vector<int> node_with_neighbor{};
+	Map_model& map;
+	GeoHashTire tire_of_neighbor_nodes_roads;
 };
 
 

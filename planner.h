@@ -1,5 +1,5 @@
 #pragma once
-#pragma GCC optimize(2)
+#pragma GCC optimize(3,"Ofast","inline")
 #include <iostream>
 #include "graph_model.h"
 #include <iomanip>
@@ -18,7 +18,7 @@ class Route_planner{
                 int cur = path.front();
                 path.pop_front();
                 count++;
-                send_txt += to_string(self_model_.Nodes()[cur].Lon) + " " + to_string(self_model_.Nodes()[cur].Lat) + " ";
+                send_txt += to_string(self_model_.map.Nodes()[cur].Lon) + " " + to_string(self_model_.map.Nodes()[cur].Lat) + " ";
             }
             cout<<"count: "<<count<<endl;
         }
@@ -38,7 +38,6 @@ class Route_planner{
     private:
         void add_neighbors_forward(int current_node_forward, int current_node_backward);
         void add_neighbors_backward(int current_node_forward, int current_node_backward);
-        float calculate_h_value(int node, int to_node, int goal_node) const;
         void construct_final_path(int current_node);
         unordered_map<int, pair<float, float> > node_infomation{};   
         unordered_map<int, int> parent_node_forward{};
