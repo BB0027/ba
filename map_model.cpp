@@ -31,6 +31,7 @@ static Map_model::Road::Type Get_type(string_view v){
     if( v == "pedestrian" )      return Map_model::Road::Footway;    
     if( v == "corridor")         return Map_model::Road::Footway;
     if( v == "sidewalk" )        return Map_model::Road::Footway;
+    if( v == "crossing")         return Map_model::Road::Residential;
     if( v  == "cycleway")        return Map_model::Road::Cycleway;
     return Map_model::Road::Invalid;       
 }
@@ -118,6 +119,7 @@ void Map_model::Load_data(const char* map_path){
     cout<<"node read success...size is: "<<Nodes_list.size()<<endl;
     int hit_time_highway = 0;
     unordered_map<unsigned long long,unsigned int> Way_id_map;
+    int none_index = 0;
     for(auto node_w = node->NextSiblingElement("way"); node_w;node_w = node_w->NextSiblingElement("way")){
         Way_id_map[stoll(node_w->Attribute("id"))] = Ways_list.size();
         //cout<<"Way_id: "<<node_w->Attribute("id")<<endl;
@@ -126,6 +128,7 @@ void Map_model::Load_data(const char* map_path){
         bool isroad = false, isfootway = false, iscycleway = false;
         bool road_is_oneway = false, cycleway_is_oneway = false;
         int road_max_speed;
+        string road_name = "";
         enum Map_model::Road::Type way_type;
         //cout<<"Way read begin..."<<endl;
         for(const TiXmlElement* child_node = node_w->FirstChildElement(); child_node; child_node = child_node->NextSiblingElement()){
@@ -138,20 +141,23 @@ void Map_model::Load_data(const char* map_path){
             else if(child_node->Value() == string("tag")){
                 string_view k = child_node->Attribute("k");
                 string_view v = child_node->Attribute("v");
+                if(k == "name"){
+                    road_name = child_node->Attribute("v");
+                    //cout<<"Name: "<<v<<"  ";
+                }
                 if(k == "highway"){
                     hit_time_highway++;
                     way_type = Get_type(v);
                     //cout<<"way_type: "<<(int)way_type<<"  "; 
                     if(way_type != Road::Invalid){
-                        if(way_type == Road::Motorway
-                        || way_type == Road::Primary  || way_type == Road::Secondary 
+                        if(way_type == Road::Primary  || way_type == Road::Secondary 
                         || way_type == Road::Tertiary || way_type == Road::Residential
                         || way_type == Road::Service  || way_type == Road::Unclassified){
                             isfootway = true;
                             iscycleway = true;
                             isroad = true;
                         }
-                        else if (way_type == Road::Trunk){
+                        else if (way_type == Road::Trunk || way_type == Road::Motorway){
                             isfootway = false;
                             iscycleway = false;
                             isroad = true;
@@ -200,8 +206,12 @@ void Map_model::Load_data(const char* map_path){
                 }
             }
         }
+        if(road_name == ""){
+            road_name = "无名路"+to_string(none_index++);
+        }
         if(isroad){
                 Roads_list.emplace_back();
+                Roads_list.back().Way_name = road_name;
                 Roads_list.back().Way_type = way_type;
                 Roads_list.back().Way_id = Way_id_map[stoll(node_w->Attribute("id"))];
                 Roads_list.back().is_oneway = road_is_oneway;
@@ -237,6 +247,7 @@ void Map_model::Load_data(const char* map_path){
         }
         if(isfootway){
                 Foot_Way_list.emplace_back();
+                Foot_Way_list.back().Way_name = road_name;
                 Foot_Way_list.back().Way_type = Map_model::Road::Footway;
                 Foot_Way_list.back().Way_id = Way_id_map[stoll(node_w->Attribute("id"))];
                 Foot_Way_list.back().is_oneway = false;
@@ -244,9 +255,10 @@ void Map_model::Load_data(const char* map_path){
         }
         if(iscycleway){
                 Cycle_Way_list.emplace_back();
+                Cycle_Way_list.back().Way_name = road_name;
                 Cycle_Way_list.back().Way_type = Map_model::Road::Cycleway;
                 Cycle_Way_list.back().Way_id = Way_id_map[stoll(node_w->Attribute("id"))];
-                Cycle_Way_list.back().is_oneway = cycleway_is_oneway;
+                Cycle_Way_list.back().is_oneway = cycleway_is_oneway || road_is_oneway;
                 Cycle_Way_list.back().max_speed = 15;
         }
     }
@@ -264,6 +276,7 @@ void Map_model::Load_data(const char* map_path){
 }
 
 void Map_model::search_near(int mode, double lat, double lon){
+    buffer.clear();
     time_t start = clock();
     cout<<"search_near begin..."<<endl;
     buffer.clear();
@@ -281,6 +294,7 @@ void Map_model::search_near(int mode, double lat, double lon){
     }
     time_t end = clock();
     cout<<"search_near time: "<<(double)(end - start) / CLOCKS_PER_SEC << "s" << endl;
+    cout<<"search_near size: "<<buffer.size()<<endl;
 }
 
 void Map_model::search_near(GeoHashTire& Tire, unordered_multimap<string, int>& id_list, double lat, double lon){

@@ -35,10 +35,14 @@ public:
 	void search_near_points(float lon, float lat, unordered_set<int>& res, int depth);
 	int find_closest_node(float lon, float lat);
 
+	unordered_map<int, unordered_set<string_view>> Nodes_road_list{};
     unordered_map<int, vector<int>> node_neighbors_list{};
+    unordered_map<int, vector<int>> node_neighbors_list_reverse{};
 	unordered_multimap<string, int> hashstr_nodeids_map{};
     unordered_map<pair<int, int>, double, HashFunc, EqualKey> node_neighbors_distance_list{};
 	unordered_map<pair<int, int>, double, HashFunc, EqualKey> node_neighbors_traveltime_list_{};
+	unordered_map<pair<int, int>, double, HashFunc, EqualKey> node_neighbors_distance_list_reverse{};
+	unordered_map<pair<int, int>, double, HashFunc, EqualKey> node_neighbors_traveltime_list_reverse{};
 	vector<int> node_with_neighbor{};
 	Map_model& map;
 	GeoHashTire tire_of_neighbor_nodes_roads;

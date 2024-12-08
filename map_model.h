@@ -32,6 +32,7 @@ public:
         int max_speed;
         Type Way_type;
         bool is_oneway = false;
+        string Way_name;
     };
 
     

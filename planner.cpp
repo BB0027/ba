@@ -4,13 +4,14 @@
 
 Route_planner::Route_planner(Graph_model& model) : self_model_(model), openlist_start(cmp(*this)), openlist_end(cmp(*this)){
     // Convert inputs to percentage:
-    node_infomation.reserve(200000);
-    parent_node_backward.reserve(200000);
-    parent_node_forward.reserve(200000);
-    is_visited_backward.reserve(200000);
-    is_visited_backward.reserve(200000);
-    is_closed_backward.reserve(200000);
-    is_closed_formward.reserve(200000);
+    node_infomation.reserve(500000);
+    parent_node_backward.reserve(500000);
+    parent_node_forward.reserve(500000);
+    is_visited_backward.reserve(500000);
+    is_visited_backward.reserve(500000);
+    is_closed_backward.reserve(500000);
+    is_closed_formward.reserve(500000);
+    road_names.clear();
     path.clear();
     distance_ = 0.0f;
     traveltime_ = 0.0f;
@@ -18,6 +19,7 @@ Route_planner::Route_planner(Graph_model& model) : self_model_(model), openlist_
 
 void Route_planner::reset(float start_Lon, float start_Lat, float end_Lon, float end_Lat){
     path.clear();
+    road_names.clear();
     openlist_start.~priority_queue();
     openlist_end.~priority_queue();
     new (&openlist_start) priority_queue<int, vector<int>, cmp>(cmp(*this));
@@ -50,6 +52,7 @@ void Route_planner::reset(float start_Lon, float start_Lat, float end_Lon, float
 
 void Route_planner::A_star_search() {
     cout<<"searching..."<<endl;
+    cout<<"average_speed: "<<self_model_.average_speed_<<endl;
     openlist_start.push(start_node_);
     openlist_end.push(end_node_);
     is_visited_formward.insert(start_node_);
@@ -116,7 +119,7 @@ inline void Route_planner::add_neighbors_forward(int current_node_forward) {
         //cout<<"father_info finished"<<endl;
         float g_value = node_infomation[current_node_forward].first + self_model_.node_neighbors_traveltime_list_[make_pair(current_node_forward, neighbor)];
         //cout<<"g_value finished"<<endl;
-        float h_value = 60*1.25*self_model_.map.distance(neighbor, end_node_)/(self_model_.average_speed_*1000);
+        float h_value = 60*1.3*self_model_.map.distance(neighbor, end_node_)/(self_model_.average_speed_*1000);
         //cout<<"h_value finished"<<endl;
         if(is_visited_formward.find(neighbor)!= is_visited_formward.end()){
             //cout<<"hit"<<endl;
@@ -136,13 +139,13 @@ inline void Route_planner::add_neighbors_forward(int current_node_forward) {
 inline void Route_planner::add_neighbors_backward(int current_node_backward) {
     //cout<<"add_neighbors begin"<<endl;
     //cout<<"neibors size: "<<self_model_.node_neighbors_list[current_node_backward].size()<<endl;
-    for(int neighbor : self_model_.node_neighbors_list[current_node_backward]){
+    for(int neighbor : self_model_.node_neighbors_list_reverse[current_node_backward]){
         if(is_closed_backward.find(neighbor)!= is_visited_backward.end()){
             continue;
         }
         parent_node_backward[neighbor] = current_node_backward;
-        float g_value = node_infomation[current_node_backward].first + self_model_.node_neighbors_traveltime_list_[make_pair(current_node_backward, neighbor)];
-        float h_value = 60*1.25*self_model_.map.distance(neighbor, start_node_)/(self_model_.average_speed_*1000);
+        float g_value = node_infomation[current_node_backward].first + self_model_.node_neighbors_traveltime_list_reverse[make_pair(current_node_backward, neighbor)];
+        float h_value = 60*1.3*self_model_.map.distance(neighbor, start_node_)/(self_model_.average_speed_*1000);
         if(is_visited_backward.find(neighbor)!= is_visited_backward.end()){
             if(g_value + h_value < node_infomation[neighbor].second){
                 node_infomation[neighbor] = {g_value, h_value};
@@ -176,8 +179,8 @@ void Route_planner::construct_final_path(int current_node){
     {
         node_iter = parent_node_backward[node_iter];
         //cout<<"node_iter: "<<node_iter<<" "<<"path.back(): "<<path.back()<<endl;
-        distance_ += self_model_.node_neighbors_distance_list[make_pair(node_iter, path.back())];
-        traveltime_ += self_model_.node_neighbors_traveltime_list_[make_pair(node_iter, path.back())];
+        distance_ += self_model_.node_neighbors_distance_list_reverse[make_pair(node_iter, path.back())];
+        traveltime_ += self_model_.node_neighbors_traveltime_list_reverse[make_pair(node_iter, path.back())];
         path.push_back(node_iter);
     }
 }
