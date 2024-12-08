@@ -127,9 +127,9 @@ void Map_model::Load_data(const char* map_path){
         auto &new_way = Ways_list.back();
         bool isroad = false, isfootway = false, iscycleway = false;
         bool road_is_oneway = false, cycleway_is_oneway = false;
-        int road_max_speed;
+        int road_max_speed = 0;
         string road_name = "";
-        enum Map_model::Road::Type way_type;
+        enum Map_model::Road::Type way_type = Map_model::Road::Unclassified;
         //cout<<"Way read begin..."<<endl;
         for(const TiXmlElement* child_node = node_w->FirstChildElement(); child_node; child_node = child_node->NextSiblingElement()){
             //cout<<"hit"<<endl;
@@ -220,16 +220,16 @@ void Map_model::Load_data(const char* map_path){
                         Roads_list.back().max_speed = 120;
                     }
                     else if(way_type == Road::Trunk){
-                        Roads_list.back().max_speed = 100;
+                        Roads_list.back().max_speed = 80;
                     }
                     else if(way_type == Road::Primary){
-                        Roads_list.back().max_speed = 70;
+                        Roads_list.back().max_speed = 40;
                     }
                     else if(way_type == Road::Secondary){
-                        Roads_list.back().max_speed = 60;
+                        Roads_list.back().max_speed = 30;
                     }
                     else if(way_type == Road::Tertiary){
-                        Roads_list.back().max_speed = 40;
+                        Roads_list.back().max_speed = 20;
                     }
                     else if(way_type == Road::Residential){
                         Roads_list.back().max_speed = 5;
@@ -238,12 +238,18 @@ void Map_model::Load_data(const char* map_path){
                         Roads_list.back().max_speed = 5;
                     }
                     else if(way_type == Road::Unclassified){
-                        Roads_list.back().max_speed = 10;
+                        Roads_list.back().max_speed = 5;
+                    }
+                    else{
+                        Roads_list.back().max_speed = 5;
                     }
                 }
                 else{
-                    Roads_list.back().max_speed = road_max_speed;
+                    Roads_list.back().max_speed = road_max_speed * 0.7;
                 }
+                //cout<<"way_name: "<<Roads_list.back().Way_name<<" ";
+                //cout<<"max_speed: "<<Roads_list.back().max_speed<<" ";
+                //cout<<"way_type: "<<(int)Roads_list.back().Way_type<<endl;
         }
         if(isfootway){
                 Foot_Way_list.emplace_back();

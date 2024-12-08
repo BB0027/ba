@@ -5,7 +5,7 @@ Graph_model::Graph_model(const string& mode, Map_model& map) : map(map){
     cout<<"------------Graph model init begin------------"<<endl;
     cout<<"mode:  "<<mode<<endl;
     if(mode == "drive"){
-        average_speed_ = 60;
+        average_speed_ = 50;
         Build(map.Roads());  
     }
     else if(mode == "footway"){

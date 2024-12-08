@@ -62,46 +62,53 @@ void Route_planner::A_star_search() {
     int loop_time = 0;
 
     while(!openlist_start.empty() && !openlist_end.empty()){
-        loop_time++;
         int current_node_backward = openlist_end.top();
-        int current_node_forward = openlist_start.top();
+        int current_node_forward;
         //cout<<"current_node_forward: "<<current_node_forward<<" current_node_backward: "<<current_node_backward<<endl;
-        openlist_start.pop();
-        is_closed_formward.insert(current_node_forward);
-        if(is_closed_backward.find(current_node_forward)!= is_visited_backward.end()){
-            clock_t start_time_of_construct=clock();
-            construct_final_path(current_node_forward);
-            clock_t end_time_of_construct=clock();
-            cout<<"loop: "<<loop_time<<endl;
-            cout<< "visitedsize: "<< is_visited_formward.size()+is_visited_backward.size()<<endl;
-            cout<< "max_openlistsize: "<<max_openlistsize<<endl;
-            cout << "The construct time is: " <<(double)(end_time_of_construct - start_time_of_construct) / CLOCKS_PER_SEC << "s" << endl;
-            cout << "The add_neighbors time is: " <<(double)(sum_time_of_add_neighbors) / CLOCKS_PER_SEC << "s" << endl;
-            return;
+        while(loop_time % 400 <= 300){
+            loop_time++;
+            current_node_forward = openlist_start.top();
+            openlist_start.pop();
+            is_closed_formward.insert(current_node_forward);
+            if(is_closed_backward.find(current_node_forward)!= is_visited_backward.end()){
+                clock_t start_time_of_construct=clock();
+                construct_final_path(current_node_forward);
+                clock_t end_time_of_construct=clock();
+                cout<<"loop: "<<loop_time<<endl;
+                cout<< "visitedsize: "<< is_visited_formward.size()+is_visited_backward.size()<<endl;
+                cout<< "max_openlistsize: "<<max_openlistsize<<endl;
+                cout << "The construct time is: " <<(double)(end_time_of_construct - start_time_of_construct) / CLOCKS_PER_SEC << "s" << endl;
+                cout << "The add_neighbors time is: " <<(double)(sum_time_of_add_neighbors) / CLOCKS_PER_SEC << "s" << endl;
+                return;
+            }
+            clock_t start_time=clock();
+            add_neighbors_forward(current_node_forward);
+            clock_t end_time=clock();
+            sum_time_of_add_neighbors += (end_time - start_time);
         }
-        clock_t start_time=clock();
-        add_neighbors_forward(current_node_forward);
-        clock_t end_time=clock();
-        sum_time_of_add_neighbors += (end_time - start_time);
-
-        openlist_end.pop();
-        is_closed_backward.insert(current_node_backward);
-        if(is_closed_formward.find(current_node_backward)!= is_visited_formward.end()){
-            clock_t start_time_of_construct=clock();
-            construct_final_path(current_node_backward);
-            clock_t end_time_of_construct=clock();
-            cout<<"loop: "<<loop_time<<endl;
-            cout<< "visitedsize: "<< is_visited_formward.size()+is_visited_backward.size()<<endl;
-            cout<< "max_openlistsize: "<<max_openlistsize<<endl;
-            cout << "The construct time is: " <<(double)(end_time_of_construct - start_time_of_construct) / CLOCKS_PER_SEC << "s" << endl;
-            cout << "The add_neighbors time is: " <<(double)(sum_time_of_add_neighbors) / CLOCKS_PER_SEC << "s" << endl;
-            return;
+        current_node_forward = openlist_start.top();
+        while(loop_time % 400 > 200){
+            loop_time++;
+            current_node_backward = openlist_end.top();
+            openlist_end.pop();
+            is_closed_backward.insert(current_node_backward);
+            if(is_closed_formward.find(current_node_backward)!= is_visited_formward.end()){
+                clock_t start_time_of_construct=clock();
+                construct_final_path(current_node_backward);
+                clock_t end_time_of_construct=clock();
+                cout<<"loop: "<<loop_time<<endl;
+                cout<< "visitedsize: "<< is_visited_formward.size()+is_visited_backward.size()<<endl;
+                cout<< "max_openlistsize: "<<max_openlistsize<<endl;
+                cout << "The construct time is: " <<(double)(end_time_of_construct - start_time_of_construct) / CLOCKS_PER_SEC << "s" << endl;
+                cout << "The add_neighbors time is: " <<(double)(sum_time_of_add_neighbors) / CLOCKS_PER_SEC << "s" << endl;
+                return;
+            }
+            time_t start_time=clock();
+            add_neighbors_backward(current_node_backward);
+            time_t end_time=clock();
+            sum_time_of_add_neighbors += (end_time - start_time);
+            max_openlistsize = max(max_openlistsize, openlist_start.size()+openlist_end.size());
         }
-        start_time=clock();
-        add_neighbors_backward(current_node_backward);
-        end_time=clock();
-        sum_time_of_add_neighbors += (end_time - start_time);
-        max_openlistsize = max(max_openlistsize, openlist_start.size()+openlist_end.size());
     }
     cout<<"error"<<endl;
 }
